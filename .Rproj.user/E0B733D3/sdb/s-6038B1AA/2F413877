@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "#collect data\nlibrary(rvest)\n\n#ex webage: http://www.chakoteya.net/NextGen/101.htm\n\n#Return an XML document of this episode's site\nurl_101 <- \"http://www.chakoteya.net/NextGen/101.htm\"\nhtml_101 <- read_html(url_101)\n\nxml_find_all(x = html_101, xpath = \"//tr\")\n\n#extract contents with css selector\ntd_element <- html_nodes(html_101, css = \"td\")\n\n#Extract text from the body\nbodytext <- html_text(td_element)\n\n#Print the script\nbodytext\n",
+    "created" : 1508887926798.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "762052279",
+    "id" : "2F413877",
+    "lastKnownWriteTime" : 1509242895,
+    "last_content_update" : 1509242895440,
+    "path" : "~/R Projects - Data Science/startrek/trek_getdata.R",
+    "project_path" : "trek_getdata.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
