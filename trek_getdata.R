@@ -13,7 +13,7 @@ beam_me_in <- function(url) {
 }
 
 #test site
-beam_me_in("http://www.chakoteya.net/NextGen/101.htm")
+#beam_me_in("http://www.chakoteya.net/NextGen/101.htm")
 
 #Read in a table of every episode listing you'll need.
 my_sheets <- gs_ls()
@@ -28,7 +28,7 @@ episodes.all <- episode_gsheet %>% #Read in the episode google sheet
 
 
 #Run your function on every episode URL in that list, appended to a new table.
-beam_me_in(episodes.all[3, "Link"]) %>% nchar()
+#beam_me_in(episodes.all[593, "Link"]) %>% nchar()
 
 #Initialize blank variable where script will go
 episodes.all[, "script"] <- "blank"
@@ -40,4 +40,16 @@ for (i in 1:nrow(episodes.all)) {
   episode_script <- beam_me_in(url)
   episodes.all[i, "script"] <- episode_script
 }
+#Same episodes (split in two "to be continued" halfway down):
+#492 and 493
+#517 and 518
+#566 and 567
+#592 and 594
+
+#Write out episodes.all to csv so you don't have to keep scraping a ton of urls
+#to reform the data frame.
+write.csv(episodes.all, file = "all_startrek_episode_scripts.csv")
+
+
+#Manually separate out the "to be continued" episodes?
 
