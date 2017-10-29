@@ -1,19 +1,43 @@
 #collect data
 library(rvest)
+library(googlesheets)
 
-#ex webage: http://www.chakoteya.net/NextGen/101.htm
+#function to pull the script from a given URL:
+beam_me_in <- function(url) {
+  url_string <- url
+  html_readin <- read_html(url_string) #Return an XML doc of the episode's site
+  xml_find_all(x=html_readin, xpath = "//tr")  
+  td_element <- html_nodes(html_readin, css = "td") #extract contents w/ css selector
+  script_text <- html_text(td_element)  #extract text from the body
+  return(script_text)  #return the script for that URL's episode.  Unformatted.
+}
 
-#Return an XML document of this episode's site
-url_101 <- "http://www.chakoteya.net/NextGen/101.htm"
-html_101 <- read_html(url_101)
+#test site
+beam_me_in("http://www.chakoteya.net/NextGen/101.htm")
 
-xml_find_all(x = html_101, xpath = "//tr")
+#Read in a table of every episode listing you'll need.
+my_sheets <- gs_ls()
+#you may need to auth in and allow tidyverse permissions.
+trek_key <- "1aPUPBR-QxOJmxLCGyoe7s6i0odI3aeC2mw393LiiHPs" #find this in your my_sheets table
+episode_gsheet <- gs_key(trek_key) #pulls in specific google sheet data
+gsheet_names <- gs_ws_ls(episode_gsheet) #find the list of tab names
+#read in the first 
+episodes.all <- episode_gsheet %>% #Read in the episode google sheet
+                gs_read(gsheet_names[1]) %>%  #specifically the first tab ("Sheet1")
+                as.data.frame()  #coerce it to be a data.frame for better data handling later
 
-#extract contents with css selector
-td_element <- html_nodes(html_101, css = "td")
 
-#Extract text from the body
-bodytext <- html_text(td_element)
+#Run your function on every episode URL in that list, appended to a new table.
+beam_me_in(episodes.all[3, "Link"]) %>% nchar()
 
-#Print the script
-bodytext
+#Initialize blank variable where script will go
+episodes.all[, "script"] <- "blank"
+
+#populate the "script" var in episodes with the actual script!
+for (i in 1:nrow(episodes.all)) {
+  #Pull out that episode's script
+  url <- episodes.all[i, "Link"]
+  episode_script <- beam_me_in(url)
+  episodes.all[i, "script"] <- episode_script
+}
+
