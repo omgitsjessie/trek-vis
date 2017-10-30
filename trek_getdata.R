@@ -52,4 +52,42 @@ write.csv(episodes.all, file = "all_startrek_episode_scripts.csv")
 
 
 #Manually separate out the "to be continued" episodes?
+tbc <- c(492, 517, 566, 592)
+tbc_eps <- episodes.all[tbc, ]
+library(stringr)
 
+sum(episodes.all$script %>% str_detect("To Be Continued"))
+#There are 34 episodes with 'To Be Continued' but only 4 are split across the same Link URL.
+
+episodes.all[542, "Link"]  #There's still one instance of this in ep 542, 
+  # BUT it is part of the verbal dialogue and not part of the script splitting.
+episodes.all[517, "script"] <- str_replace(episodes.all[517, "script"], 
+            pattern = "To be continued", 
+            replacement = "To Be Continued")
+
+sum(tbc_eps$script %>% str_detect("To Be Continued"))
+sum(tbc_eps$script %>% str_detect("To be continued"))
+which(tbc_eps$script %>% str_detect("To Be Continued"))
+episodes.all[517, "Link"]
+
+#Fix duplicated url for 16 + 16b
+episodes.all[13, "Link"] <- "http://www.chakoteya.net/StarTrek/16b.htm"
+episodes.all[13, "script"] <- beam_me_in("http://www.chakoteya.net/StarTrek/16b.htm")
+
+#Verify there are no more duplicate Link elements; 
+episodes.all[duplicated(episodes.all$Link), "Link"]
+
+# For your set of 4 shared url episodes, replace script var with the correct 
+# half of the script (before/after "to be continued")
+#keep only second half of script in the second part of the show.
+for (i in c(493, 518, 567, 593)) {
+  episodes.all[i, "script"] <- gsub(pattern = "(.*)(To Be Continued)(.*)",
+                  replacement = "\\3", 
+                  x = episodes.all[i, "script"])
+}
+#keep only the first half of script (including to be continued) in the 1st show
+for (i in c(492, 517, 566, 592)) {
+  episodes.all[i, "script"] <- gsub(pattern = "(.*To Be Continued)(.*)",
+                                    replacement = "\\1", 
+                                    x = episodes.all[i, "script"])
+}
