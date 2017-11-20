@@ -4,6 +4,7 @@ library(googlesheets)
 library(stringr)
 library(ggplot2)
 
+
 #function to pull the script from a given URL:
 beam_me_in <- function(url) {
   url_string <- url
@@ -158,5 +159,25 @@ episodes.all$stardate %>%
   is.na() %>%
   mean()
 
-plot(df, ty)
 
+#Create a smaller data.frame from the FIRST episode, containing a row for each
+#line of dialogue.  
+testdf <- data.frame(episodes.all[1, "script"])
+names(testdf) <- "fullscript"
+library(stringr)
+
+#Break the full script cell into a column for each spoken line in the script.
+
+#This gets us alternating character / lines; but with a random [foo] line 
+#in row one and possibly throughout.. not sure.
+
+#Does not capture:
+# some lines beginning with 'AAAAA [OC]:' presumably over intercom?
+# character names that are two words 'OLD MAN:'
+# character names with an extra space between the character and the :   'PIKE :'
+#Preserves but probably should not:
+# bracket-notated location text: [Bridge], [Transporter room] etc
+# parenthetical notes for background activity or visuals: (Boyce enters with bag) etc
+
+testdf.split <- strsplit( gsub("(\r\n[A-Z]*:)","~\\1~", testdf$fullscript), "~" )
+testdf.lines3 <- testdf.split %>% data.frame()
