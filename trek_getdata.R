@@ -174,7 +174,7 @@ testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
 #Backreference each character name (full words separated by a space, then :)
 #Then add a ~ around each one.  Then split my string to new rows based on that ~ char.
 testdf.split <- strsplit( gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script), "~" )
-testdf.lines3 <- testdf.split %>% data.frame()
+testdf.lines3 <- testdf.split %>% data.frame() 
 names(testdf.lines3) <- "lines"
 
 testdf.lines4 <- testdf.lines3
