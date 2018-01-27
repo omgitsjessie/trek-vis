@@ -165,6 +165,11 @@ episodes.all$stardate %>%
 #line of dialogue.  
 testdf <- data.frame(episodes.all[1, "script"])
 names(testdf) <- "script"
+
+#Take out all the \r\n  metachars
+testdf$script <- gsub("\\r", " ", testdf$script)
+testdf$script <- gsub("\\n", " ", testdf$script)
+
 testdf$script <- gsub("\\{", "\\[", testdf$script) #replace curly braces with braces
 testdf$script <- gsub("\\}", "\\]", testdf$script) #replace curly braces with braces
 testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
