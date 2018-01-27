@@ -163,7 +163,12 @@ episodes.all$stardate %>%
 #Create a smaller data.frame from the FIRST episode, containing a row for each
 #line of dialogue.  
 testdf <- data.frame(episodes.all[1, "script"])
-names(testdf) <- "fullscript"
+names(testdf) <- "script"
+testdf$script <- gsub("\\{", "\\[", testdf$script) #replace curly braces with braces
+testdf$script <- gsub("\\}", "\\]", testdf$script) #replace curly braces with braces
+testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
+#testdf$script <- gsub("\\[.*\\]", "", testdf$script) #clean out blocking notes altogether
+
 library(stringr)
 
 #Break the full script cell into a column for each spoken line in the script.
@@ -172,12 +177,29 @@ library(stringr)
 #in row one and possibly throughout.. not sure.
 
 #Does not capture:
-# some lines beginning with 'AAAAA [OC]:' presumably over intercom?
-# character names that are two words 'OLD MAN:'
-# character names with an extra space between the character and the :   'PIKE :'
+# lines with 'AAAA [blocking]:' as the speaker..
+            # some lines beginning with 'AAAAA [OC]:' presumably over intercom? - FIXED
+            # character names that are two words 'OLD MAN:' - Fixed
+            # character names with an extra space between the character and the :   'PIKE :' - FIXED
 #Preserves but probably should not:
 # bracket-notated location text: [Bridge], [Transporter room] etc
 # parenthetical notes for background activity or visuals: (Boyce enters with bag) etc
 
-testdf.split <- strsplit( gsub("(\r\n[A-Z]*:)","~\\1~", testdf$fullscript), "~" )
+# testdf.split <- strsplit( gsub("(\r\n[A-Z]*:)","~\\1~", testdf$script), "~" )
+# testdf.lines3 <- testdf.split %>% data.frame()
+
+
+testdf.split <- strsplit( gsub("([A-Z]* *[A-Z]* *:)","~\\1~", testdf$script), "~" )
 testdf.lines3 <- testdf.split %>% data.frame()
+
+#Rename the column so it's not nonsense.
+# names(testdf.lines3) <- "lines"
+#Flag each line, is it script / character / location or blocking
+# testdf.lines3$description <- ""
+
+#if it's in brackets, then its blocking.
+# for (i in 1:nrow(testdf.lines3)){
+#   if (grep(pattern = "\\[.*\\]", x = testdf.lines3[i, "lines"])) {
+#     testdf.lines3[i, "description"] <- "blocking"
+#   }
+# }
