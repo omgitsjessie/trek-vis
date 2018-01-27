@@ -177,13 +177,13 @@ testdf.split <- strsplit( gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script), "~"
 testdf.lines3 <- testdf.split %>% data.frame()
 names(testdf.lines3) <- "lines"
 
+testdf.lines4 <- testdf.lines3
+#Now split each line into Char | Line
+testdf.lines4$char <- testdf.lines3$lines
+testdf.lines4$line <- testdf.lines3$lines
 
-
-
-#Break the full script cell into a column for each spoken line in the script.
-
-#This gets us alternating character / lines; but with a random [foo] line 
-#in row one and possibly throughout.. not sure.
+testdf.lines4$char <- gsub("([A-Z]* *[A-Z]*)( *:.*)","\\1", testdf.lines4$char)
+testdf.lines4$line <- gsub("(.*:)(.*)","\\2", testdf.lines4$line)
 
 #Does not capture:
 # lines with 'AAAA [blocking]:' as the speaker..
@@ -193,8 +193,5 @@ names(testdf.lines3) <- "lines"
 #Preserves but probably should not:
 # bracket-notated location text: [Bridge], [Transporter room] etc
 # parenthetical notes for background activity or visuals: (Boyce enters with bag) etc
-
-# testdf.split <- strsplit( gsub("(\r\n[A-Z]*:)","~\\1~", testdf$script), "~" )
-# testdf.lines3 <- testdf.split %>% data.frame()
-
+  
 
