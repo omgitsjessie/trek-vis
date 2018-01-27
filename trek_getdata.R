@@ -3,6 +3,7 @@ library(rvest)
 library(googlesheets)
 library(stringr)
 library(ggplot2)
+library(stringr)
 
 
 #function to pull the script from a given URL:
@@ -169,7 +170,15 @@ testdf$script <- gsub("\\}", "\\]", testdf$script) #replace curly braces with br
 testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
 #testdf$script <- gsub("\\[.*\\]", "", testdf$script) #clean out blocking notes altogether
 
-library(stringr)
+
+#Backreference each character name (full words separated by a space, then :)
+#Then add a ~ around each one.  Then split my string to new rows based on that ~ char.
+testdf.split <- strsplit( gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script), "~" )
+testdf.lines3 <- testdf.split %>% data.frame()
+names(testdf.lines3) <- "lines"
+
+
+
 
 #Break the full script cell into a column for each spoken line in the script.
 
@@ -189,17 +198,3 @@ library(stringr)
 # testdf.lines3 <- testdf.split %>% data.frame()
 
 
-testdf.split <- strsplit( gsub("([A-Z]* *[A-Z]* *:)","~\\1~", testdf$script), "~" )
-testdf.lines3 <- testdf.split %>% data.frame()
-
-#Rename the column so it's not nonsense.
-# names(testdf.lines3) <- "lines"
-#Flag each line, is it script / character / location or blocking
-# testdf.lines3$description <- ""
-
-#if it's in brackets, then its blocking.
-# for (i in 1:nrow(testdf.lines3)){
-#   if (grep(pattern = "\\[.*\\]", x = testdf.lines3[i, "lines"])) {
-#     testdf.lines3[i, "description"] <- "blocking"
-#   }
-# }
