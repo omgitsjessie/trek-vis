@@ -166,19 +166,26 @@ episodes.all$stardate %>%
 testdf <- data.frame(episodes.all[1, "script"])
 names(testdf) <- "script"
 
-#Take out all the \r\n  metachars
-testdf$script <- gsub("\\r", " ", testdf$script)
-testdf$script <- gsub("\\n", " ", testdf$script)
+
+#Remove blocking notes in parens.  Doesn't work..  confirmed one or more unclosed parens.
+#testdf$script <- gsub("\\(.*\\)", "", testdf$script)
+
 
 testdf$script <- gsub("\\{", "\\[", testdf$script) #replace curly braces with braces
 testdf$script <- gsub("\\}", "\\]", testdf$script) #replace curly braces with braces
 testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
 #testdf$script <- gsub("\\[.*\\]", "", testdf$script) #clean out blocking notes altogether
 
+#Add a '~' in front of each speaker's name, for each line.
+testdf$script <- gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script)
 
-#Backreference each character name (full words separated by a space, then :)
-#Then add a ~ around each one.  Then split my string to new rows based on that ~ char.
-testdf.split <- strsplit( gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script), "~" )
+#Take out all the \r\n  metachars
+testdf$script <- gsub("\\r", " ", testdf$script)
+testdf$script <- gsub("\\n", " ", testdf$script)
+
+
+# Split my string to new rows based on that ~ char.
+testdf.split <- strsplit(testdf$script, "~" )
 testdf.lines3 <- testdf.split %>% data.frame() 
 names(testdf.lines3) <- "lines"
 
@@ -189,6 +196,8 @@ testdf.lines4$line <- testdf.lines3$lines
 
 testdf.lines4$char <- gsub("([A-Z]* *[A-Z]*)( *:.*)","\\1", testdf.lines4$char)
 testdf.lines4$line <- gsub("(.*:)(.*)","\\2", testdf.lines4$line)
+#TODO - Remove the (*) lines -- if you do it here it won't delete lots of text
+    #in the case of closed parens.
 
 #Does not capture:
 # lines with 'AAAA [blocking]:' as the speaker..
