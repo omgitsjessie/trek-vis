@@ -161,6 +161,9 @@ episodes.all$stardate %>%
   mean()
 
 
+#TODO - Eventually make this whole mess a function, so you can call that
+#on each episode; to separate into lines for NPL & character stat viz
+
 #Create a smaller data.frame from the FIRST episode, containing a row for each
 #line of dialogue.  
 testdf <- data.frame(episodes.all[1, "script"])
@@ -179,10 +182,19 @@ testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
 #Add a '~' in front of each speaker's name, for each line.
 testdf$script <- gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script)
 
+#Before you remove newline metachars, evaluate each open bracket to delete
+#all content either ending with a close parens or the newline.
+testdf$script <- gsub("\\[[^]\r\n]*(?:]|\\R)", " ", testdf$script, perl=TRUE)
+# \[         an open bracket
+# [^]\r\n]*  0+ chars other than ], CR and LF
+# (?:]|\R)   either a ] (]) or (|) line break sequence (\R)
+#Future Jessie - answered at https://stackoverflow.com/questions/48489825/gsub-bracketed-content-occasionally-bound-by-newline-instead-of-closing-bracket?noredirect=1#comment83973951_48489825
+
+#TODO - Remove the (*) lines with similar approach.
+
 #Take out all the \r\n  metachars
 testdf$script <- gsub("\\r", " ", testdf$script)
 testdf$script <- gsub("\\n", " ", testdf$script)
-
 
 # Split my string to new rows based on that ~ char.
 testdf.split <- strsplit(testdf$script, "~" )
@@ -196,8 +208,6 @@ testdf.lines4$line <- testdf.lines3$lines
 
 testdf.lines4$char <- gsub("([A-Z]* *[A-Z]*)( *:.*)","\\1", testdf.lines4$char)
 testdf.lines4$line <- gsub("(.*:)(.*)","\\2", testdf.lines4$line)
-#TODO - Remove the (*) lines -- if you do it here it won't delete lots of text
-    #in the case of closed parens.
 
 #Does not capture:
 # lines with 'AAAA [blocking]:' as the speaker..
@@ -205,7 +215,7 @@ testdf.lines4$line <- gsub("(.*:)(.*)","\\2", testdf.lines4$line)
             # character names that are two words 'OLD MAN:' - Fixed
             # character names with an extra space between the character and the :   'PIKE :' - FIXED
 #Preserves but probably should not:
-# bracket-notated location text: [Bridge], [Transporter room] etc
+            # bracket-notated location text: [Bridge], [Transporter room] etc - FIXED
 # parenthetical notes for background activity or visuals: (Boyce enters with bag) etc
   
 
