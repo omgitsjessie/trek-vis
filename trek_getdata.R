@@ -169,26 +169,23 @@ episodes.all$stardate %>%
 testdf <- data.frame(episodes.all[1, "script"])
 names(testdf) <- "script"
 
-
-#Remove blocking notes in parens.  Doesn't work..  confirmed one or more unclosed parens.
-#testdf$script <- gsub("\\(.*\\)", "", testdf$script)
-
-
-testdf$script <- gsub("\\{", "\\[", testdf$script) #replace curly braces with braces
-testdf$script <- gsub("\\}", "\\]", testdf$script) #replace curly braces with braces
-testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
-#testdf$script <- gsub("\\[.*\\]", "", testdf$script) #clean out blocking notes altogether
-
+#Replace curly braces with brackets for cleaner regex down the line.
+testdf$script <- gsub("\\{", "\\[", testdf$script)
+testdf$script <- gsub("\\}", "\\]", testdf$script)
 
 #Before you remove newline metachars, evaluate each open bracket to delete
 #all content either ending with a close parens or the newline.
-testdf$script <- gsub("\\[[^]\r\n]*(?:]|\\R)", " ", testdf$script, perl=TRUE)
-# \[         an open bracket
-# [^]\r\n]*  0+ chars other than ], CR and LF
-# (?:]|\R)   either a ] (]) or (|) line break sequence (\R)
-#Future Jessie - answered at https://stackoverflow.com/questions/48489825/gsub-bracketed-content-occasionally-bound-by-newline-instead-of-closing-bracket?noredirect=1#comment83973951_48489825
+testdf$script <- gsub("\\[[^]\r\n]*(?:]|\\R)", "", testdf$script, perl=TRUE)
+    # \\[         an open bracket
+    # [^]\r\n]*  0+ chars other than ], CR and LF
+    # (?:]|\R)   either a ] (]) or (|) line break sequence (\R)
+    #Future Jessie - answered at https://stackoverflow.com/questions/48489825/gsub-bracketed-content-occasionally-bound-by-newline-instead-of-closing-bracket?noredirect=1#comment83973951_48489825
 
-#TODO - Remove the (*) lines with similar approach.
+#Remove the (.*) lines with similar approach.
+testdf$script <- gsub("\\([^)\r\n]*(?:\\)|\\R)", " ", testdf$script, perl=TRUE)
+    # \\(         an open parens
+    # [^)\r\n]*  0+ chars other than ), CR and LF
+    # (?:)|\R)   either a ')'  or (|) line break sequence (\R)
 
 #Take out all the \r\n  metachars
 testdf$script <- gsub("\\r", " ", testdf$script)
@@ -197,12 +194,13 @@ testdf$script <- gsub("\\n", " ", testdf$script)
 #Add a '~' in front of each speaker's name, for each line.
 testdf$script <- gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script)
 
-# Split my string to new rows based on that ~ char.
+# Split string to new rows based on that ~ char.
 testdf.split <- strsplit(testdf$script, "~" )
 testdf.lines3 <- testdf.split %>% data.frame() 
 names(testdf.lines3) <- "lines"
 
 testdf.lines4 <- testdf.lines3
+
 #Now split each line into Char | Line
 testdf.lines4$char <- testdf.lines3$lines
 testdf.lines4$line <- testdf.lines3$lines
@@ -217,6 +215,7 @@ testdf.lines4$line <- gsub("(.*:)(.*)","\\2", testdf.lines4$line)
             # character names with an extra space between the character and the :   'PIKE :' - FIXED
 #Preserves but probably should not:
             # bracket-notated location text: [Bridge], [Transporter room] etc - FIXED
-# parenthetical notes for background activity or visuals: (Boyce enters with bag) etc
+            # parenthetical notes for background activity or visuals: (Boyce enters with bag) etc - FIXED
+
   
 
