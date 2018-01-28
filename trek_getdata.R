@@ -179,8 +179,6 @@ testdf$script <- gsub("\\}", "\\]", testdf$script) #replace curly braces with br
 testdf$script <- gsub("\\[OC\\]", "", testdf$script) #clean out com mentions
 #testdf$script <- gsub("\\[.*\\]", "", testdf$script) #clean out blocking notes altogether
 
-#Add a '~' in front of each speaker's name, for each line.
-testdf$script <- gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script)
 
 #Before you remove newline metachars, evaluate each open bracket to delete
 #all content either ending with a close parens or the newline.
@@ -196,6 +194,9 @@ testdf$script <- gsub("\\[[^]\r\n]*(?:]|\\R)", " ", testdf$script, perl=TRUE)
 testdf$script <- gsub("\\r", " ", testdf$script)
 testdf$script <- gsub("\\n", " ", testdf$script)
 
+#Add a '~' in front of each speaker's name, for each line.
+testdf$script <- gsub("([A-Z]* *[A-Z]* *:)","~\\1", testdf$script)
+
 # Split my string to new rows based on that ~ char.
 testdf.split <- strsplit(testdf$script, "~" )
 testdf.lines3 <- testdf.split %>% data.frame() 
@@ -210,7 +211,7 @@ testdf.lines4$char <- gsub("([A-Z]* *[A-Z]*)( *:.*)","\\1", testdf.lines4$char)
 testdf.lines4$line <- gsub("(.*:)(.*)","\\2", testdf.lines4$line)
 
 #Does not capture:
-# lines with 'AAAA [blocking]:' as the speaker..
+            # speaker name when 'AAAA [blocking notes]:' is the syntax - FIXED
             # some lines beginning with 'AAAAA [OC]:' presumably over intercom? - FIXED
             # character names that are two words 'OLD MAN:' - Fixed
             # character names with an extra space between the character and the :   'PIKE :' - FIXED
