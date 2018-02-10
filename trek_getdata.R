@@ -211,6 +211,7 @@ clean_episode_string <- function(script_string) {
 #TODO: Currently does not work on some episodes?  ex 2, 3.  works on 1 & 4.
 #scratch work
 #clean_script <- clean_episode_string(episodes.all[4, "script"])
+#2 & 3 start with no speaker defined, maybe that's it?
 
 
 
