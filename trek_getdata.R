@@ -151,20 +151,21 @@ episodes.all$stardate <- as.numeric(episodes.all$stardate)
 write.csv(episodes.all, file = "all_startrek_episode_scripts.csv")
 
 #Plot hist to see if you have any undetected outliers
+#episodes.all <- all_startrek_episode_scripts #Start here if you don't want to reimport everything.
 ggplot(episodes.all, aes(x=stardate, fill = Series)) + 
   geom_histogram() + 
   ggtitle("Stardate histogram")
 
-#percent of episodes with a given stardate
+#percent of episodes with a given stardate.  Missing "Enterprise" due to Mission Date.
 episodes.all$stardate %>% 
   is.na() %>%
   mean()
-
+script_string <- episodes.all[1,"script"]
 #function to clean one script, given it's string blob:
 clean_episode_string <- function(script_string) {
-  testdf <- script_string
+  testdf <- as.data.frame(script_string)
   names(testdf) <- "script"
-  
+
   #Replace curly braces with brackets for cleaner regex down the line.
   testdf$script <- gsub("\\{", "\\[", testdf$script)
   testdf$script <- gsub("\\}", "\\]", testdf$script)
@@ -208,46 +209,60 @@ clean_episode_string <- function(script_string) {
   return(testdf.lines4[, c("char", "line")])  #return the script for that URL's episode.  Unformatted.
 }
 
-#TODO: Currently does not work on some episodes?  ex 2, 3.  works on 1 & 4.
-#scratch work
-#clean_script <- clean_episode_string(episodes.all[4, "script"])
-#2 & 3 start with no speaker defined, maybe that's it?
 
-
-
-
-#Initialize an empty for all episodes, with each row being a line in the script.
-#This will be used to rbind all the individual episode scripts.
-all_episodes_by_line <- data.frame(EpisodeName=character(),
-                                   Production=character(),
-                                   Airdate=character(),
-                                   Series=character(),
-                                   Season=character(),
-                                   URL_string=character(),
-                                   char=character(),
-                                   script_line=character(),
-                                   stardate=numeric(),
-                                   missiondate=character(),
-                                   stringsAsFactors=FALSE)
-
-for (i in c(1,4)) {
-  #pull out an individual script
-  episodedf <- data.frame(episodes.all[i, "script"])
-  episode_data <- data.frame(episodes.all[i, 2:10])
-  #run your clean_episode_string() program
-  clean_script <- clean_episode_string(episodedf)
-  
-  #define temp_single_episode with nrow(cleanscript) rows and 10 cols.
-  temp_single_episode <- data.frame(matrix(NA, nrow = nrow(clean_script), ncol = 10))
-  colnames(temp_single_episode) <- c("EpisodeName", "Production", "Airdate", "Series",
-                "Season", "URL_string", "char", "script_line", 
-                "stardate", "missiondate")
-  
-  #Fill it with that episodes metadata and cleaned script lines
-  temp_single_episode[,1:6] <- episode_data[1,1:6]
-  temp_single_episode[,7:8] <- clean_script[,]
-  temp_single_episode[,9:10] <- episode_data[1,8:9]
-  
-  #rbind each episode w/ metadata to the running large df of all episodes.
-  all_episodes_by_line <- rbind(all_episodes_by_line, temp_single_episode)
+#This generates a MASSIVE file of all script lines by character for all episodes.
+#It skips some episodes that my regex doesn't play well with... 9, 14 for example and I'm
+#sure there are many more.  
+#TODO - tryCatch() to figure out which ones you're skipping.
+ScriptLines_append <- c("char","line") #initialize blank vector
+for (i in c(1:712)) {
+  try({tempscript_byline <- clean_episode_string(episodes.all[i, "script"])
+  ScriptLines_append <- rbind(ScriptLines_append, tempscript_byline)}, silent = TRUE)
 }
+
+#write that to file, so you don't need to run it each time. Takes about 60s on my laptop.
+write.csv(ScriptLines_append, file = "most_startrek_script_lines.csv")
+
+# #TODO - Figure this out so you can tag each script line with metadata that may be
+# #fun for future visualization.
+# 
+# #Initialize an empty for all episodes, with each row being a line in the script.
+# #This will be used to rbind all the individual episode scripts.
+# all_episodes_by_line <- NULL
+# all_episodes_by_line <- data.frame(EpisodeName=character(),
+#                                    Production=character(),
+#                                    Airdate=character(),
+#                                    Series=character(),
+#                                    Season=character(),
+#                                    URL_string=character(),
+#                                    char=character(),
+#                                    script_line=character(),
+#                                    stardate=numeric(),
+#                                    missiondate=character(),
+#                                    stringsAsFactors=FALSE)
+# 
+# #Should this just be a different function?  Take One Episode Script
+# for (i in c(1)) {
+#   #pull out an individual script
+#   try({
+#     episodedf <- data.frame(episodes.all[i, "script"])
+#     episode_data <- data.frame(episodes.all[i, 2:10])
+#     #run your clean_episode_string() program
+#     clean_script <- clean_episode_string(episodedf)
+#     
+#     #define temp_single_episode with nrow(cleanscript) rows and 10 cols.
+#     temp_single_episode <- data.frame(matrix(NA, nrow = nrow(clean_script), ncol = 10))
+#     colnames(temp_single_episode) <- c("EpisodeName", "Production", "Airdate", "Series",
+#                   "Season", "URL_string", "char", "script_line", 
+#                   "stardate", "missiondate")
+#     
+#     #Fill it with that episodes metadata and cleaned script lines
+#     temp_single_episode[,1:6] <- episode_data[1,1:6]
+#     temp_single_episode[,7:8] <- clean_script[,]
+#     temp_single_episode[,9:10] <- episode_data[1,8:9]
+#   })  
+#   #rbind each episode w/ metadata to the running large df of all episodes.
+#   all_episodes_by_line <- rbind(all_episodes_by_line, temp_single_episode)
+# 
+# }
+
