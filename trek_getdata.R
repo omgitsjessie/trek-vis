@@ -162,7 +162,7 @@ episodes.all$stardate %>%
   mean()
 script_string <- episodes.all[1,"script"]
 #function to clean one script, given it's string blob:
-clean_episode_string <- function(script_string) {
+clean_episode_string <- function(script_string, episode_name) {
   testdf <- as.data.frame(script_string)
   names(testdf) <- "script"
 
@@ -201,30 +201,34 @@ clean_episode_string <- function(script_string) {
   #Now split each line into Char | Line
   testdf.lines4$char <- testdf.lines3$lines
   testdf.lines4$line <- testdf.lines3$lines
+  testdf.lines4$episode_name <- ""
   
   #Populate each col with their appropriate portion of the entire line.
   testdf.lines4$char <- gsub("([A-Z]* *[A-Z]*)( *:.*)","\\1", testdf.lines4$char)
   testdf.lines4$line <- gsub("(.*:)(.*)","\\2", testdf.lines4$line)
+  testdf.lines4$episode_name <- episode_name
   
-  return(testdf.lines4[, c("char", "line")])  #return the script for that URL's episode.  Unformatted.
+  return(testdf.lines4[, c("char", "line", "episode_name")])  #return the script for that URL's episode.  Unformatted.
 }
 
+#testadding_episode <- clean_episode_string(episodes.all[1,"script"], episodes.all[1,"Episode.Name"])
 
 #This generates a MASSIVE file of all script lines by character for all episodes.
 #It skips some episodes that my regex doesn't play well with... 9, 14 for example and I'm
 #sure there are many more.  
 #TODO - tryCatch() to figure out which ones you're skipping.
-ScriptLines_append <- c("char","line") #initialize blank vector
+ScriptLines_append <- c("char","line", "episode_name") #initialize blank vector
 for (i in c(1:712)) {
-  try({tempscript_byline <- clean_episode_string(episodes.all[i, "script"])
+  try({tempscript_byline <- clean_episode_string(episodes.all[i, "script"], episodes.all[i,"Episode.Name"])
   ScriptLines_append <- rbind(ScriptLines_append, tempscript_byline)}, silent = TRUE)
 }
 
 #write that to file, so you don't need to run it each time. Takes about 60s on my laptop.
 write.csv(ScriptLines_append, file = "most_startrek_script_lines.csv")
+#TODO - huh. Gives everything the first episode's name.  
+#TODO - Merge the all script file back to the metadata file, so you have all that jazz :D
 
-# #TODO - Figure this out so you can tag each script line with metadata that may be
-# #fun for future visualization.
+
 # 
 # #Initialize an empty for all episodes, with each row being a line in the script.
 # #This will be used to rbind all the individual episode scripts.
