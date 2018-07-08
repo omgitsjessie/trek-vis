@@ -234,3 +234,6 @@ full_script_data <- join(ScriptLines_append, metadata, type = "left", by = "Epis
 #write to file, so you don't need to run it each time.
 write.csv(full_script_data, file = "full_script_data.csv")
 
+#At this point, you have generated the cleaned data containing scripts by line and episode metadata.
+
+#TODO - Clean whitespace from char name in full dataset.
