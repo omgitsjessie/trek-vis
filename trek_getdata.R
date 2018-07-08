@@ -225,48 +225,8 @@ for (i in c(1:712)) {
 
 #write that to file, so you don't need to run it each time. Takes about 60s on my laptop.
 write.csv(ScriptLines_append, file = "most_startrek_script_lines.csv")
-#TODO - huh. Gives everything the first episode's name.  
+
 #TODO - Merge the all script file back to the metadata file, so you have all that jazz :D
 
 
-# 
-# #Initialize an empty for all episodes, with each row being a line in the script.
-# #This will be used to rbind all the individual episode scripts.
-# all_episodes_by_line <- NULL
-# all_episodes_by_line <- data.frame(EpisodeName=character(),
-#                                    Production=character(),
-#                                    Airdate=character(),
-#                                    Series=character(),
-#                                    Season=character(),
-#                                    URL_string=character(),
-#                                    char=character(),
-#                                    script_line=character(),
-#                                    stardate=numeric(),
-#                                    missiondate=character(),
-#                                    stringsAsFactors=FALSE)
-# 
-# #Should this just be a different function?  Take One Episode Script
-# for (i in c(1)) {
-#   #pull out an individual script
-#   try({
-#     episodedf <- data.frame(episodes.all[i, "script"])
-#     episode_data <- data.frame(episodes.all[i, 2:10])
-#     #run your clean_episode_string() program
-#     clean_script <- clean_episode_string(episodedf)
-#     
-#     #define temp_single_episode with nrow(cleanscript) rows and 10 cols.
-#     temp_single_episode <- data.frame(matrix(NA, nrow = nrow(clean_script), ncol = 10))
-#     colnames(temp_single_episode) <- c("EpisodeName", "Production", "Airdate", "Series",
-#                   "Season", "URL_string", "char", "script_line", 
-#                   "stardate", "missiondate")
-#     
-#     #Fill it with that episodes metadata and cleaned script lines
-#     temp_single_episode[,1:6] <- episode_data[1,1:6]
-#     temp_single_episode[,7:8] <- clean_script[,]
-#     temp_single_episode[,9:10] <- episode_data[1,8:9]
-#   })  
-#   #rbind each episode w/ metadata to the running large df of all episodes.
-#   all_episodes_by_line <- rbind(all_episodes_by_line, temp_single_episode)
-# 
-# }
 
