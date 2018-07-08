@@ -222,18 +222,27 @@ for (i in c(1:712)) {
   ScriptLines_append <- rbind(ScriptLines_append, tempscript_byline)}, silent = TRUE)
 }
 
-#write that to file, so you don't need to run it each time. Takes about 60s on my laptop.
+#write  to file
 write.csv(ScriptLines_append, file = "most_startrek_script_lines.csv")
 
-#Merge the all script file back to the metadata file, so you have all the goodness
+#Merge the all script file back to the metadata file, to have all metadata goodness
 metadata <- episodes.all[,c(1:7, 9:10)] #remove script var so takes less time to evaluate
 names(ScriptLines_append) <- c("char", "line", "Episode.Name")
 full_script_data <- join(ScriptLines_append, metadata, type = "left", by = "Episode.Name")
-#samplescript <- full_script_data[6000:6500,]
 
 #write to file, so you don't need to run it each time.
 write.csv(full_script_data, file = "full_script_data.csv")
 
 #At this point, you have generated the cleaned data containing scripts by line and episode metadata.
 
-#TODO - Clean whitespace from char name in full dataset.
+#TODO - figure out which episodes you are missing?  Outer join?  Not yet working.
+# missing_eps <- join(metadata, full_script_data, type = "outer", by = "Episode.Name")
+
+
+#TODO - Clean whitespace from char name in full dataset.  str_trim()
+for (i in 1:length(full_script_data)) {
+  try(full_script_data[i, "char"] <- str_trim(full_script_data[i, "char"]))
+}
+
+#TODO - remove the "captain's log" character from most episodes.  Bad regex.
+#TODO - create character database?  Gender / alien / race / station?
