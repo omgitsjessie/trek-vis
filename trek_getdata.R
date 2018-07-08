@@ -4,6 +4,7 @@ library(googlesheets)
 library(stringr)
 library(ggplot2)
 library(stringr)
+library(plyr)
 
 
 #function to pull the script from a given URL:
@@ -211,12 +212,10 @@ clean_episode_string <- function(script_string, episode_name) {
   return(testdf.lines4[, c("char", "line", "episode_name")])  #return the script for that URL's episode.  Unformatted.
 }
 
-#testadding_episode <- clean_episode_string(episodes.all[1,"script"], episodes.all[1,"Episode.Name"])
-
 #This generates a MASSIVE file of all script lines by character for all episodes.
 #It skips some episodes that my regex doesn't play well with... 9, 14 for example and I'm
 #sure there are many more.  
-#TODO - tryCatch() to figure out which ones you're skipping.
+#TODO - tryCatch() to figure out which ones you're skipping.  Or look at a outer join back with the metadata set.
 ScriptLines_append <- c("char","line", "episode_name") #initialize blank vector
 for (i in c(1:712)) {
   try({tempscript_byline <- clean_episode_string(episodes.all[i, "script"], episodes.all[i,"Episode.Name"])
@@ -226,7 +225,12 @@ for (i in c(1:712)) {
 #write that to file, so you don't need to run it each time. Takes about 60s on my laptop.
 write.csv(ScriptLines_append, file = "most_startrek_script_lines.csv")
 
-#TODO - Merge the all script file back to the metadata file, so you have all that jazz :D
+#Merge the all script file back to the metadata file, so you have all the goodness
+metadata <- episodes.all[,c(1:7, 9:10)] #remove script var so takes less time to evaluate
+names(ScriptLines_append) <- c("char", "line", "Episode.Name")
+full_script_data <- join(ScriptLines_append, metadata, type = "left", by = "Episode.Name")
+#samplescript <- full_script_data[6000:6500,]
 
-
+#write to file, so you don't need to run it each time.
+write.csv(full_script_data, file = "full_script_data.csv")
 
